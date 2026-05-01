@@ -1,0 +1,113 @@
+[Mode]
+# 设置运行模式
+# "block": 删除或替换方块
+# "item":  删除或替换物品
+# "clean": 清理存档
+Main_Mode = "block"
+# 存档路径
+# 你的存档根目录
+Save_Path = "save/path"
+# 物品扫描模式
+# "common": 普通扫描，适用原版端，扫描 实体+地图+玩家数据 目录
+# "full":   完整扫描，适用模组端，扫描 实体+地图+玩家数据+数据文件 目录
+# "global": 全面扫描，适用模组端，扫描 实体+地图+玩家数据+数据文件 目录及子目录
+# "custom": 自定义扫描，仅扫描高级设置custom_scan_path中的路径
+Item_Scan_Mode = "common"
+# 扫描进程数量
+Process_Use = 4
+
+
+[Target]
+# 需要扫描并处理的维度
+# 若要扫描所有维度请设置为 ["all"]
+Dimensions = [ "minecraft:overworld", "minecraft:the_nether", "minecraft:the_end",]
+
+[Target.Task]
+# 目标任务
+# 需要替换的方块或物品，把左边的替换成右边的
+# 如需添加更多替换任务，在这一项底部接着写就行
+"minecraft:dirt" = "minecraft:air"
+"minecraft:stone" = "minecraft:bedrock"
+
+[Target.Select_Area]
+# 目标区域
+# 需要处理的区域，同时适用所有维度，若都为 [0,0] 代表处理整个地图
+# 范围是 从top_xz 到end_xz 的矩形区域。精度为32区块，不足32区块自动向外扩展
+top_xz = [ 0, 0,]
+end_xz = [ 0, 0,]
+
+
+# 存档清理设置
+[Target.Cleaner]
+# "跑图区块的"的区块活跃时间识别阈值，单位为 tick (gt)
+# 区块活跃时间代表玩家在该区块的总刻数，多个玩家同处一区块时增长更快
+# 跑图区块指的是玩家在跑图或者挖矿过程中快速路过的区块
+tick_threshold = 3600
+
+# "跑图区块的"的识别冷却时间，单位为 tick (gt)
+# 若区块最后修改时间到游戏保存时的时长小于冷却时间，则会跳过该区块
+cooldown = 6000
+
+
+[Advanced]
+# 世界高度限制-最高高度
+world_height_top = 320
+# 世界高度限制-最高低度
+world_height_end = -64
+
+# 是否在执行处理前先进行扫描 (仅对block模式生效)
+# 若目标不是常见方块(不是每个区块都有)，那建议开启，处理速度会明显提升
+# 若目标是常见方块(每个区块都有)，那建议关闭，开启后处理速度反而会下降
+scan_before_processing = true
+
+# 自定义物品数据文件扫描目录 (仅对item模式生效)
+# 添加后，程序将尝试解析目录下的所有文件，并扫描处理文件中物品数据
+# 注意只适用于以NBT格式存储的文件，就像data和playerdata中的文件；不适用于.mca
+custom_scan_path = []
+
+
+[Advanced.mcc_file]
+# 对于额外区块存储文件 .mcc 的处理方式
+# 若区块内包含很多数据，处理将消耗大量内存和时间！请自行决定是否处理！
+# skip: 跳过
+# delete: 删除
+# handle: 正常处理
+mcc_file_mode = "handle"
+
+# 用于处理.mcc文件的进程数量
+# 处理.mcc文件可能会消耗大量内存，请自己抉择！
+mcc_file_process_use = 2
+
+# 处理.mcc文件的大小限制，超过此大小的文件将视为无效文件，单位MB
+mcc_file_size_limit = 4
+
+# 无效(超限)的.mcc文件处理模式
+# skip: 跳过
+# delete: 删除
+# handle: 无视风险，继续处理
+invalid_mcc_file_mode = "skip"
+
+
+[Advanced.item_compound_key]
+# 物品标签识别关键词
+# 程序就是通过这些关键词从NBT数据中找出存储物品的字段
+# 正常情况下无需修改，除非你知道这是什么意思并清楚你在做什么。具体请看下面的说明
+id_keys = [ "id", "Id", "ID",]
+item_keys = [ "Item", "item", "ITEM",]
+
+# 物品标签识别关键词匹配格式说明：
+# 程序在处理物品时，会尝试遍历所有NBT数据，并匹配下面两种物品存储格式
+# 一种是 直接物品格式，类似展示框，具体如下
+# {
+#   "<id_key>": "minecraft:apple",
+# }
+# 另一种是 嵌套物品格式，类似箱子，具体如下
+# {
+#   "<item_key>": {
+#     "<id_key>": "minecraft:apple",
+#   },
+# }
+#
+# 这两种存储物品的结构适用于原版中箱子熔炉等实体方块，
+# 也适用于玩家数据等NBT数据文件，同时还适用于绝大多数模组方块和数据文件
+# 如果一些模组使用了别的字段来存储物品导致无法处理，可以尝试添加这些关键词来增加兼容性

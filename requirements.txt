@@ -1,0 +1,4 @@
+colorama==0.4.6
+nbtlib==2.0.4
+rich==14.2.0
+tomli==2.4.0; python_version < "3.11"
