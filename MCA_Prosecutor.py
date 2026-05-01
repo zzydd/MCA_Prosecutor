@@ -1537,6 +1537,9 @@ def Main_Exit(signum=None, frame=None):
 
 #【主程序】
 if __name__ == '__main__':
+    # 校验版权
+    if Copyright != "Copyright (C) 2026 ZZYDD":
+        sys.exit(0)
     # 设置终端标题
     print("\033]0;MCA Prosecutor\007\n", end="", flush=True)
     Console().clear()
