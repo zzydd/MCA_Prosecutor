@@ -1,5 +1,6 @@
 # Copyright (C) 2026 ZZYDD
 # SPDX-License-Identifier: GPL-3.0-or-later
+Copyright = "Copyright (C) 2026 ZZYDD"
 
 import time
 from pathlib import Path
