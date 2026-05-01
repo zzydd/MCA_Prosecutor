@@ -138,6 +138,9 @@ def get_file_size_str(bytes_size):
 
 # 【程序描述页】
 def Page_Description():
+    # 校验版权
+    if Copyright != "Copyright (C) 2026 ZZYDD":
+        sys.exit(0)
     show_logo(1)
     # 左侧输出列表
     left_lines = [
