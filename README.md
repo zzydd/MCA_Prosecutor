@@ -758,4 +758,4 @@ pip3 install -r requirements.txt
 
 ### 本项目版权声明
 
-#### *Copyright (C) 2026 ZZYDD*
+#### Copyright (C) 2026 ZZYDD
