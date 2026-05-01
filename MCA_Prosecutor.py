@@ -26,6 +26,7 @@ colorama.init()
 Terminal = Console(color_system='auto', style=None)
 Project = unity_path(os.path.realpath(sys.argv[0]))
 MainPath = unity_path(os.path.dirname(Project))
+Copyright = "Copyright (C) 2026 ZZYDD"
 os.chdir(MainPath)
 
 def cutline(long):
