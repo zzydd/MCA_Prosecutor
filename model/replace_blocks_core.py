@@ -69,10 +69,12 @@ def replace_block(section, target_dict):
 
 
 # 处理单个区块
-def processing_chunk(chunk, target_dict):
+def processing_chunk(chunk, target_dict, advanced_config):
     # 获取子区块高度
-    section_top = mcap_config.World_Section_Top
-    section_end = mcap_config.World_Section_End
+    # section_top = mcap_config.World_Section_Top
+    # section_end = mcap_config.World_Section_End
+    section_top = advanced_config["World_Section_Top"]
+    section_end = advanced_config["World_Section_End"]
     # 创建新区块对象
     chunk_new = EmptyChunk(chunk.x, chunk.z, chunk.version, chunk.status, chunk.data)
     modified_sections = []
@@ -123,7 +125,7 @@ def processing_chunk(chunk, target_dict):
 
 
 # 区块生成器
-def chunk_generator(region, target_dict):
+def chunk_generator(region, target_dict, advanced_config):
     # 遍历所有区块
     for chunk_x in range(32):
         for chunk_z in range(32):
@@ -138,13 +140,13 @@ def chunk_generator(region, target_dict):
             if chunk.status not in Full_Chunk_Status:
                 continue # 跳过未生成完成的区块
             # 处理区块
-            chunk_new = processing_chunk(chunk, target_dict)
+            chunk_new = processing_chunk(chunk, target_dict, advanced_config)
             # 生成修改后的区块
             yield chunk_new
 
 
 #【在内存中流式处理区块】(高效!)
-def processing_region_mca(region_root_dir, mca_file, target_dict):
+def processing_region_mca(region_root_dir, mca_file, target_dict, advanced_config):
     # 读取区域文件
     region_file_path = unity_path(f"{region_root_dir}/{mca_file}")
     with open(region_file_path, 'rb') as f:
@@ -156,7 +158,7 @@ def processing_region_mca(region_root_dir, mca_file, target_dict):
     except:
         return
     # 创建区块生成器
-    chunk_iter =  chunk_generator(region, target_dict)
+    chunk_iter =  chunk_generator(region, target_dict, advanced_config)
     # 流式处理所有区块
     region_data = modify_region.modify_region_bytes_batch(region_data, chunk_iter)
     # 清理无效区块数据
@@ -166,11 +168,13 @@ def processing_region_mca(region_root_dir, mca_file, target_dict):
         f.write(region_data)
 
 #【处理额外区块文件】
-def processing_region_mcc(root_dir, file, target_dict):
+def processing_region_mcc(root_dir, file, target_dict, advanced_config):
     # 检查.mcc文件是否合法
     mcc_file_path = unity_path(f"{root_dir}/{file}")
-    size_limit = mcap_config.MCC_FILE_SIZE_LIMIT
-    invalid_mode = mcap_config.INVALIT_MCC_FILE_Mode
+    # size_limit = mcap_config.MCC_FILE_SIZE_LIMIT
+    # invalid_mode = mcap_config.INVALIT_MCC_FILE_Mode
+    size_limit = advanced_config["MCC_FILE_SIZE_LIMIT"]
+    invalid_mode = advanced_config["INVALIT_MCC_FILE_Mode"]
     if not mcc_file.check_mcc_file(mcc_file_path, size_limit, invalid_mode):
         return
     # 从.mcc文件中加载区块
@@ -181,20 +185,20 @@ def processing_region_mcc(root_dir, file, target_dict):
     if chunk.status not in Full_Chunk_Status:
         return  # 跳过未生成完成的区块
     # 处理区块
-    chunk_new = processing_chunk(chunk, target_dict)
+    chunk_new = processing_chunk(chunk, target_dict, advanced_config)
     # 写入新区块
     mcc_file.save_mcc(mcc_file_path, chunk_new)
 
 
 def _processing_region_mca_multiprocessing(args):
     """处理区域文件-多进程启动入口"""
-    region_root_dir, region_file, target_dict = args
-    processing_region_mca(region_root_dir, region_file, target_dict)
+    region_root_dir, region_file, target_dict, advanced_config = args
+    processing_region_mca(region_root_dir, region_file, target_dict, advanced_config)
 
 def _processing_region_mcc_multiprocessing(args):
     """处理区域文件-多进程启动入口"""
-    region_root_dir, region_file, target_dict = args
-    processing_region_mcc(region_root_dir, region_file, target_dict)
+    region_root_dir, region_file, target_dict, advanced_config = args
+    processing_region_mcc(region_root_dir, region_file, target_dict, advanced_config)
 
 
 def MCAP_Replace_Blocks_Core(root_dir, file_list, target_dict, max_processes=1, mode=0):
@@ -211,7 +215,8 @@ def MCAP_Replace_Blocks_Core(root_dir, file_list, target_dict, max_processes=1, 
     finished_files = 0 # 已处理的的文件
     total_files = len(file_list) # 文件总数
     root_dir = unity_path(root_dir)
-    args_list = [(root_dir, region_file, target_dict) for region_file in file_list] # 参数列表
+    advanced_config = mcap_config.Advanced_Config_Dict
+    args_list = [(root_dir, region_file, target_dict, advanced_config) for region_file in file_list] # 参数列表
     # 选择处理模式
     if mode == 0: # 处理.mca
         progress_function = _processing_region_mca_multiprocessing

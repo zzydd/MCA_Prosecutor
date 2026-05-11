@@ -12,8 +12,8 @@ except ModuleNotFoundError:
 # 定义全局变量
 WORLD_HEIGHT_TOP = 320
 WORLD_HEIGHT_END = -64
-ITEM_COMPOUND_ID_KEYS = [ "id", "Id", "ID",]
-ITEM_COMPOUND_ITEM_KEYS = [ "Item", "item", "ITEM",]
+ITEM_COMPOUND_ID_KEYS = ["id", "Id", "ID",]
+ITEM_COMPOUND_ITEM_KEYS = ["Item", "item", "ITEM",]
 CUSTOM_SCAN_DATA_PATH = []
 SCAN_BEFORE_PROCESSING = True
 
@@ -23,11 +23,28 @@ MCC_FILE_SIZE_LIMIT = 4
 INVALIT_MCC_FILE_Mode = "skip"
 
 
-CHUNK_FULL_STATUS_List = ["fullchunk", "full", "minecraft:full", "postprocessed"]
 # 计算区块高度
 World_Section_Top = int(WORLD_HEIGHT_TOP//16)
 World_Section_End = int(WORLD_HEIGHT_END//16)
 
+# 区块生成完毕标识
+CHUNK_FULL_STATUS_List = ["fullchunk", "full", "minecraft:full", "postprocessed"]
+
+# 高级配置封装 (传给子进程用的)
+Advanced_Config_Dict = {
+    "WORLD_HEIGHT_TOP": WORLD_HEIGHT_TOP,
+    "WORLD_HEIGHT_END": WORLD_HEIGHT_END,
+    "World_Section_Top": World_Section_Top, # scan_blocks_core; replace_blocks_core;
+    "World_Section_End": World_Section_End, # scan_blocks_core; replace_blocks_core;
+    "ITEM_COMPOUND_ID_KEYS": ITEM_COMPOUND_ID_KEYS, # replace_items_core
+    "ITEM_COMPOUND_ITEM_KEYS": ITEM_COMPOUND_ITEM_KEYS, # replace_items_core
+    "CUSTOM_SCAN_DATA_PATH": CUSTOM_SCAN_DATA_PATH,
+    "SCAN_BEFORE_PROCESSING": SCAN_BEFORE_PROCESSING,
+    "MCC_FILE_MODE": MCC_FILE_MODE,
+    "MCC_FILE_PROCESS_USE": MCC_FILE_PROCESS_USE,
+    "MCC_FILE_SIZE_LIMIT": MCC_FILE_SIZE_LIMIT, # replace_blocks_core; replace_items_core
+    "INVALIT_MCC_FILE_Mode": INVALIT_MCC_FILE_Mode, # replace_blocks_core; replace_items_core
+}
 
 
 def Load_Config_File(file_path):
@@ -59,6 +76,7 @@ def load_advanced_config(config_data):
     global MCC_FILE_PROCESS_USE
     global MCC_FILE_SIZE_LIMIT
     global INVALIT_MCC_FILE_Mode
+    global Advanced_Config_Dict
     try:
         # 加载配置中
         advanced_config = config_data.get('Advanced', {})
@@ -84,6 +102,21 @@ def load_advanced_config(config_data):
         if not 1 <= MCC_FILE_PROCESS_USE <= os.cpu_count():
             MCC_FILE_PROCESS_USE = 2
             print(f"{YELLOW}[WARN] {CYAN}[{get_datetime()}] {BRIGHT_RED}[config] 额外区块处理进程数不得小于1或大于系统逻辑CPU数；已重置")
+        # 更新高级配置封装
+        Advanced_Config_Dict = {
+            "WORLD_HEIGHT_TOP": WORLD_HEIGHT_TOP,
+            "WORLD_HEIGHT_END": WORLD_HEIGHT_END,
+            "World_Section_Top": World_Section_Top,
+            "World_Section_End": World_Section_End,
+            "ITEM_COMPOUND_ID_KEYS": ITEM_COMPOUND_ID_KEYS,
+            "ITEM_COMPOUND_ITEM_KEYS": ITEM_COMPOUND_ITEM_KEYS,
+            "CUSTOM_SCAN_DATA_PATH": CUSTOM_SCAN_DATA_PATH,
+            "SCAN_BEFORE_PROCESSING": SCAN_BEFORE_PROCESSING,
+            "MCC_FILE_MODE": MCC_FILE_MODE,
+            "MCC_FILE_PROCESS_USE": MCC_FILE_PROCESS_USE,
+            "MCC_FILE_SIZE_LIMIT": MCC_FILE_SIZE_LIMIT,
+            "INVALIT_MCC_FILE_Mode": INVALIT_MCC_FILE_Mode,
+        }
 
         return True
     except Exception as e:
