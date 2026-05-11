@@ -760,10 +760,12 @@ pip3 install -r requirements.txt
 *鸣谢名单按时间排序*
 
 
-| 头像                                                               | 用户名   | 鸣谢内容 |
-|------------------------------------------------------------------|-------| -------- |
-| <img src="./imgs/5/mc_player/ZZYDD.png" width="64" height="64" > | ZZYDD |          |
-|                                                                  |       |          |
+| 头像                                                                      | 用户名         | 鸣谢内容         |
+| ------------------------------------------------------------------------- | -------------- | ---------------- |
+| <img src="./imgs/5/mc_player/ZZYDD.png" width="48" height="48" >          | ZZYDD          | 项目开发         |
+| <img src="./imgs/5/mc_player/CheeseNeko_Nya.png" width="48" height="48" > | CheeseNeko_Nya | 参与程序测试活动 |
+| <img src="./imgs/5/mc_player/xiaoyua_QWQ.png" width="48" height="48" >    | xiaoyua_QWQ    | 参与程序测试活动 |
+| <img src="./imgs/5/mc_player/DTTFC.png" width="48" height="48" >          | DTTFC          | 参与程序测试活动 |
 
 ### 许可证
 
