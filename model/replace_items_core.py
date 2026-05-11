@@ -52,7 +52,7 @@ def process_compound_id(container, target_dict, id_keys):
         return "replace"
     return None
 
-def process_item_compound(compound, target_dict):
+def process_item_compound(compound, target_dict, advanced_config):
     """
     若该 TAG_Compound 是物品，执行替换
     返回 "replace" / "remove" / None
@@ -60,8 +60,10 @@ def process_item_compound(compound, target_dict):
     if not isinstance(compound, mca_nbt.TAG_Compound):
         return None
     # 字段识别关键词
-    id_keys = mcap_config.ITEM_COMPOUND_ID_KEYS
-    item_keys = mcap_config.ITEM_COMPOUND_ITEM_KEYS
+    # id_keys = mcap_config.ITEM_COMPOUND_ID_KEYS
+    # item_keys = mcap_config.ITEM_COMPOUND_ITEM_KEYS
+    id_keys = advanced_config["ITEM_COMPOUND_ID_KEYS"]
+    item_keys = advanced_config["ITEM_COMPOUND_ITEM_KEYS"]
     # 直接物品格式
     action = process_compound_id(compound, target_dict, id_keys)
     if action:
@@ -75,7 +77,7 @@ def process_item_compound(compound, target_dict):
             break
     return None
 
-def replace_items_nbt(root, target_dict):
+def replace_items_nbt(root, target_dict, advanced_config):
     """递归扫描 NBT 标签"""
     modified = False
     #【处理 TAG_List】
@@ -84,7 +86,7 @@ def replace_items_nbt(root, target_dict):
         for elem in root:
             # 处理物品标签
             if isinstance(elem, mca_nbt.TAG_Compound):
-                action = process_item_compound(elem, target_dict)
+                action = process_item_compound(elem, target_dict, advanced_config)
                 if action == "remove":
                     modified = True
                     continue          # 从列表中删除该 item（正确）
@@ -92,7 +94,7 @@ def replace_items_nbt(root, target_dict):
                     modified = True
             # 递归所有子标签
             if isinstance(elem, (mca_nbt.TAG_List, mca_nbt.TAG_Compound)):
-                if replace_items_nbt(elem, target_dict):
+                if replace_items_nbt(elem, target_dict, advanced_config):
                     modified = True
             new_tags.append(elem)
         # 若被修改，则写回
@@ -110,7 +112,7 @@ def replace_items_nbt(root, target_dict):
         for key, val in list(root.items()):
             # 若是 compound 判断是否需要删除
             if isinstance(val, mca_nbt.TAG_Compound):
-                action = process_item_compound(val, target_dict)
+                action = process_item_compound(val, target_dict, advanced_config)
                 if action == "remove":
                     # 若需删除，直接删除字段
                     try:
@@ -123,14 +125,14 @@ def replace_items_nbt(root, target_dict):
                     modified = True
             # 递归处理子标签
             if isinstance(val, (mca_nbt.TAG_List, mca_nbt.TAG_Compound)):
-                if replace_items_nbt(val, target_dict):
+                if replace_items_nbt(val, target_dict, advanced_config):
                     modified = True
         return modified
     #【其他 TAG】
     return False
 
 
-def processing_chunk(chunk, target_dict):
+def processing_chunk(chunk, target_dict, advanced_config):
     # 固定原始字典
     target_dict_raw = target_dict
     # 转换区块对象类型 (不修改，直接转)
@@ -147,7 +149,7 @@ def processing_chunk(chunk, target_dict):
     if chunk.tile_entities:
         modified_tile_entities = False
         for tag in chunk.tile_entities.tags:
-            if replace_items_nbt(tag, target_dict):
+            if replace_items_nbt(tag, target_dict, advanced_config):
                 modified_tile_entities = True
         if modified_tile_entities:
             chunk_new.tile_entities = chunk.tile_entities
@@ -156,7 +158,7 @@ def processing_chunk(chunk, target_dict):
     modified_entities = False
     if chunk.entities:
         for tag in chunk.entities.tags:
-            if replace_items_nbt(tag, target_dict):
+            if replace_items_nbt(tag, target_dict, advanced_config):
                 modified_entities = True
         if modified_entities:
             chunk_new.entities = chunk.entities
@@ -164,7 +166,7 @@ def processing_chunk(chunk, target_dict):
     return modified_tile_entities, modified_entities, chunk_new
 
 
-def chunk_generator(region, target_dict):
+def chunk_generator(region, target_dict, advanced_config):
     """区块生成器，用于批量流式处理 (区域.mca)"""
     # 遍历所有区块
     for chunk_x in range(32):
@@ -181,13 +183,13 @@ def chunk_generator(region, target_dict):
                 # 跳过未生成完成的区块
                 continue
             # 处理区块
-            modified_tile_entities, modified_entities, chunk_new = processing_chunk(chunk, target_dict)
+            modified_tile_entities, modified_entities, chunk_new = processing_chunk(chunk, target_dict, advanced_config)
             # 返回生成器
             if modified_tile_entities or modified_entities:
                 yield chunk_new
 
 
-def processing_region_mca(region_root_dir, mca_file, target_dict):
+def processing_region_mca(region_root_dir, mca_file, target_dict, advanced_config):
     """在内存中流式处理 区域.mca"""
     # 读取区域文件
     region_file_path = unity_path(f"{region_root_dir}/{mca_file}")
@@ -199,7 +201,7 @@ def processing_region_mca(region_root_dir, mca_file, target_dict):
     except:
         return
     # 创建区块生成器
-    chunk_iter = chunk_generator(region, target_dict)
+    chunk_iter = chunk_generator(region, target_dict, advanced_config)
     # 流式处理所有区块
     region_data = modify_region.modify_region_bytes_batch(region_data, chunk_iter)
     # 清理无效区块数据
@@ -209,11 +211,13 @@ def processing_region_mca(region_root_dir, mca_file, target_dict):
         f.write(region_data)
 
 
-def processing_region_mcc(root_dir, file, target_dict):
+def processing_region_mcc(root_dir, file, target_dict, advanced_config):
     # 检查.mcc文件是否合法
     mcc_file_path = unity_path(f"{root_dir}/{file}")
-    size_limit = mcap_config.MCC_FILE_SIZE_LIMIT
-    invalid_mode = mcap_config.INVALIT_MCC_FILE_Mode
+    # size_limit = mcap_config.MCC_FILE_SIZE_LIMIT
+    # invalid_mode = mcap_config.INVALIT_MCC_FILE_Mode
+    size_limit = advanced_config["MCC_FILE_SIZE_LIMIT"]
+    invalid_mode = advanced_config["INVALIT_MCC_FILE_Mode"]
     if not mcc_file.check_mcc_file(mcc_file_path, size_limit, invalid_mode):
         return
     # 从.mcc文件中加载区块
@@ -224,13 +228,13 @@ def processing_region_mcc(root_dir, file, target_dict):
     if chunk.status not in Full_Chunk_Status:
         return  # 跳过未生成完成的区块
     # 处理区块
-    modified_tile_entities, modified_entities, chunk_new = processing_chunk(chunk, target_dict)
+    modified_tile_entities, modified_entities, chunk_new = processing_chunk(chunk, target_dict, advanced_config)
     # 写回文件
     if modified_tile_entities or modified_entities:
         mcc_file.save_mcc(mcc_file_path, chunk_new)
 
 
-def processing_entities_mca(entities_root_dir, mca_file, target_dict):
+def processing_entities_mca(entities_root_dir, mca_file, target_dict, advanced_config):
     """在内存中处理 实体.mca"""
     # 读取区域文件
     entities_file_path = unity_path(f"{entities_root_dir}/{mca_file}")
@@ -259,7 +263,7 @@ def processing_entities_mca(entities_root_dir, mca_file, target_dict):
             # 遍历所有实体所有NBT
             for ent in entities:
                 if isinstance(ent, mca_nbt.TAG_Compound):
-                    if replace_items_nbt(ent, target_dict):
+                    if replace_items_nbt(ent, target_dict, advanced_config):
                         modified = True
             # 将修改过的区块添加到map
             if modified:
@@ -273,7 +277,7 @@ def processing_entities_mca(entities_root_dir, mca_file, target_dict):
         f.write(region_data)
 
 
-def processing_data_file(data_root_dir, data_file, target_dict):
+def processing_data_file(data_root_dir, data_file, target_dict, advanced_config):
     """在内存中处理 NBT.dat"""
     # 读取.dat文件并加载NBT数据
     try:
@@ -282,7 +286,7 @@ def processing_data_file(data_root_dir, data_file, target_dict):
     except Exception:
         return
     # 扫描并删除替换物品
-    modified = replace_items_nbt(nbt_root, target_dict)
+    modified = replace_items_nbt(nbt_root, target_dict, advanced_config)
     # 判断是否被编辑
     if not modified:
         return
@@ -296,23 +300,23 @@ def processing_data_file(data_root_dir, data_file, target_dict):
 
 def _processing_region_mca_multiprocessing(args):
     """处理 区域.mca：多进程启动入口"""
-    region_root_dir, region_file, target_dict = args
-    processing_region_mca(region_root_dir, region_file, target_dict)
+    region_root_dir, region_file, target_dict, advanced_config = args
+    processing_region_mca(region_root_dir, region_file, target_dict, advanced_config)
 
 def _processing_region_mcc_multiprocessing(args):
     """处理 区域.mca：多进程启动入口"""
-    region_root_dir, region_file, target_dict = args
-    processing_region_mcc(region_root_dir, region_file, target_dict)
+    region_root_dir, region_file, target_dict, advanced_config = args
+    processing_region_mcc(region_root_dir, region_file, target_dict, advanced_config)
 
 def _processing_entities_mca_multiprocessing(args):
     """处理 实体.mca：多进程启动入口"""
-    entities_root_dir, region_file, target_dict = args
-    processing_entities_mca(entities_root_dir, region_file, target_dict)
+    entities_root_dir, region_file, target_dict, advanced_config = args
+    processing_entities_mca(entities_root_dir, region_file, target_dict, advanced_config)
 
 def _processing_data_file_multiprocessing(args):
     """处理 NBT.dat：多进程启动入口"""
-    data_root_dir, region_file, target_dict = args
-    processing_data_file(data_root_dir, region_file, target_dict)
+    data_root_dir, region_file, target_dict, advanced_config = args
+    processing_data_file(data_root_dir, region_file, target_dict, advanced_config)
 
 
 def MCAP_Replace_Items_Core(root_dir, file_list, target_dict, max_processes=1, mode=0):
@@ -329,7 +333,8 @@ def MCAP_Replace_Items_Core(root_dir, file_list, target_dict, max_processes=1, m
     finished_files = 0 # 已处理的的文件
     total_files = len(file_list) # 文件总数
     root_dir = unity_path(root_dir)
-    args_list = [(root_dir, region_file, target_dict) for region_file in file_list] # 参数列表
+    advanced_config = mcap_config.Advanced_Config_Dict
+    args_list = [(root_dir, region_file, target_dict, advanced_config) for region_file in file_list] # 参数列表
     # 选择处理模式
     if mode == 0:
         progress_function = _processing_region_mca_multiprocessing

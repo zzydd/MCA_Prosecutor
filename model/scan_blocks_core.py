@@ -17,7 +17,7 @@ from mca import Region
 Full_Chunk_Status = mcap_config.CHUNK_FULL_STATUS_List
 
 # 扫描区域文件
-def scan_region_mca(region_root_dir, mca_file, target_dict):
+def scan_region_mca(region_root_dir, mca_file, target_dict, advanced_config):
     """扫描区域文件，判断是否包含目标方块"""
     # 读取区域文件
     region_file_path = unity_path(f"{region_root_dir}/{mca_file}")
@@ -34,8 +34,10 @@ def scan_region_mca(region_root_dir, mca_file, target_dict):
         for k in target_dict.keys()
     }
     # 获取子区块高度
-    section_top = mcap_config.World_Section_Top
-    section_end = mcap_config.World_Section_End
+    # section_top = mcap_config.World_Section_Top
+    # section_end = mcap_config.World_Section_End
+    section_top = advanced_config["World_Section_Top"]
+    section_end = advanced_config["World_Section_End"]
     # 遍历所有区块
     for chunk_x in range(32):
         for chunk_z in range(32):
@@ -73,8 +75,8 @@ def scan_region_mca(region_root_dir, mca_file, target_dict):
 # 扫描区域文件-多进程启动入口
 def _scan_region_mca_multiprocessing(args):
     """扫描区域文件-多进程启动入口"""
-    region_root_dir, region_file, target_dict = args
-    return scan_region_mca(region_root_dir, region_file, target_dict)
+    region_root_dir, region_file, target_dict, advanced_config = args
+    return scan_region_mca(region_root_dir, region_file, target_dict, advanced_config)
 
 def MCAP_Scan_Blocks_Core(region_root_dir, region_file_list, target_dict, max_processes=1):
     """
@@ -91,7 +93,8 @@ def MCAP_Scan_Blocks_Core(region_root_dir, region_file_list, target_dict, max_pr
     included_files_list = [] # 扫描结果(包含目标方块的区域)
     total_files = len(region_file_list) # 文件总数
     region_root_dir = unity_path(region_root_dir)
-    args_list = [(region_root_dir, region_file, target_dict) for region_file in region_file_list] # 参数列表
+    advanced_config = mcap_config.Advanced_Config_Dict
+    args_list = [(region_root_dir, region_file, target_dict, advanced_config) for region_file in region_file_list] # 参数列表
     # 创建线程池
     with Pool(processes=max_processes) as pool:
         # 创建进度条

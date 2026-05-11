@@ -29,6 +29,19 @@ MCA Prosecutor 是一款 Minecraft 存档处理工具，支持 1.2.1 ~ 26.1.2+ �
 >
 > **但您的存档需要您自己负责，我没有义务来为您的存档负责。所以，请做好备份！避免不必要的损失！**
 
+### 立即下载最新发行版
+
+- #### Linux下载：[MCA_Prosecutor](https://github.com/zzydd/MCA_Prosecutor/releases/latest/download/MCA_Prosecutor)
+- #### Windows下载：[MCA_Prosecutor.exe](https://github.com/zzydd/MCA_Prosecutor/releases/latest/download/MCA_Prosecutor.exe)
+
+> [!IMPORTANT]
+> Linux 发行版 glibc 需 ≥ 2.31
+> 
+> Windows 发行版仅支持 Win10 及以上系统
+> 
+> 且暂时仅支持x64位系统，如需其他版本请自己编译
+
+
 # 目录
 
 ### [一：功能特色](#一功能特色-1)
@@ -64,7 +77,7 @@ MCA Prosecutor 是一款 Minecraft 存档处理工具，支持 1.2.1 ~ 26.1.2+ �
 * 支持 1.2.1 ~ 26.1.2 近15年来几乎所有版本的 Minecraft 版本！
 * 支持 Forge, Fabric, Bukkit, Spigot, Paper... 理论上不受服务端约束!
 * 支持 任意模组！从底层数据格式入手，理论上所有模组中的物品和容器都完美兼容！
-* 支持 任意世界高度！无论是 0-64 还是 -64-320，甚至超过 -64 和 320 的自定义世界，全部支持！
+* 支持 任意世界高度！无论是 0-255 还是 -64-320，甚至超过 -64 和 320 的自定义世界，全部支持！
 
 > [!NOTE]
 > 超过 -64 和 320 的世界需要调整配置文件中的高级设置选项
