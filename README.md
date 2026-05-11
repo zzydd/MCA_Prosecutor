@@ -758,7 +758,7 @@ pip3 install -r requirements.txt
 
 
 
-## 鸣谢
+### 鸣谢
 
 > *鸣谢名单按时间排序*
 
@@ -773,7 +773,7 @@ pip3 install -r requirements.txt
 
 ---
 
-## 许可证
+### 许可证
 
 - ##### [本项目LICENSE](LICENSES)
 - ##### [第三方LICENSE](./LICENSES)
@@ -781,7 +781,7 @@ pip3 install -r requirements.txt
 > [!NOTE]
 > 第三方许可证文件存储于 `LICENSES` 文件夹中
 
-## 第三方库版权与许可证列表
+### 第三方库版权与许可证列表
 
 
 | 名称     | 许可协议             | 版权信息                            | 许可证                                         |
@@ -794,6 +794,6 @@ pip3 install -r requirements.txt
 
 ---
 
-## 本项目版权声明
+### 本项目版权声明
 
 #### Copyright (C) 2026 ZZYDD
