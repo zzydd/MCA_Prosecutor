@@ -67,8 +67,9 @@ MCA Prosecutor 是一款 Minecraft 存档处理工具，支持 1.2.1 ~ 26.1.2+ �
 
 ### [五：感谢与尾声](#五感谢与尾声)
 
-- #### [5.1：许可证](#许可证)
-- #### [5.2：版权信息](#本项目版权声明)
+- #### [5.1：鸣谢](#鸣谢)
+- #### [5.2：许可证](#许可证)
+- #### [5.3：版权信息](#本项目版权声明)
 
 # 一：功能特色
 
@@ -770,6 +771,8 @@ pip3 install -r requirements.txt
 | <img src="./imgs/5/mc_player/DTTFC.png" width="48" height="48" >          | DTTFC          | 参与程序测试活动 |
 | <img src="./imgs/5/mc_player/Euliot.png" width="48" height="48" >         | Euliot         | 参与程序测试活动 |
 
+---
+
 ### 许可证
 
 - ##### [本项目LICENSE](LICENSES)
@@ -788,6 +791,8 @@ pip3 install -r requirements.txt
 | nbtlib   | MIT License          | Copyright (c) 2019 Valentin Berlier | [LICENSE文件](./LICENSES/LICENSE-nbtlib.txt)   |
 | rich     | MIT License          | Copyright (c) 2020 Will McGugan     | [LICENSE文件](./LICENSES/LICENSE-rich.txt)     |
 | tomli    | MIT License          | Copyright (c) 2021 Taneli Hukkinen  | [LICENSE文件](./LICENSES/LICENSE-tomli.txt)    |
+
+---
 
 ### 本项目版权声明
 
